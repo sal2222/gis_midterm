@@ -1,0 +1,50 @@
+---
+title: "gis_midterm"
+author: "Stephen Lewandowski"
+date: "October 24, 2018"
+output: 
+  github_document:
+    toc: true
+---
+
+
+```{r setup, include = FALSE}
+
+library(tidyverse)
+library(readxl)
+library(devtools)
+library(patchwork) #devtools::install_github("thomasp85/patchwork")
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_bw() + theme(legend.position = "bottom"))
+```
+
+
+## 1. Spatial relationship between age and disability in NYC
+
+Load and tidy the data.
+
+```{r load_nyc_data, message = FALSE, warning = FALSE}
+
+age <- read_csv(file = "./data/ACS_16_5YR_S0101_with_ann.csv", skip = 1) %>% 
+  janitor::clean_names() %>%
+  select("id2", "geography", "total_estimate_summary_indicators_median_age_years") %>%
+  rename(median_age = total_estimate_summary_indicators_median_age_years) %>% 
+  separate(geography, into = c("tract", "county", "state"), sep = ",") %>%
+  separate(tract, into = c("drop1", "drop2", "tract"), sep = " ") %>%
+  mutate(county = str_trim(county, side = "left")) %>% 
+  separate(county, into = c("county", "drop3"), sep = " ") %>%
+  select(-(c(drop1, drop2, drop3, state))) %>%
+  filter(county == c("New York", "Bronx", "Kings", "Queens", "Richmond")) 
+
+age
+
+disability <- read_csv(file = "./data/ACS_16_5YR_S1810_with_ann.csv")
+
+```
+
